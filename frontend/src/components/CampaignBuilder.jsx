@@ -713,20 +713,29 @@ export default function CampaignBuilder() {
       {scrapedImages.length > 0 && (
         <div className="space-y-2">
           <Label>Scraped Product Images ({scrapedImages.length})</Label>
-          <div className="grid grid-cols-3 gap-2">
-            {scrapedImages.map((imageUrl, idx) => (
-              <div key={idx} className="relative group">
-                <img
-                  src={imageUrl}
-                  alt={`Product image ${idx + 1}`}
-                  className="w-full h-24 object-cover rounded-md border"
-                  onError={(e) => {
-                    e.target.style.display = 'none';
-                  }}
-                />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
-                  <span className="text-white text-xs">Image {idx + 1}</span>
+          <div className="grid grid-cols-2 gap-3">
+            {scrapedImages.map((image, idx) => (
+              <div key={idx} className="space-y-1">
+                <div className="relative group">
+                  <img
+                    src={typeof image === 'string' ? image : image.url}
+                    alt={typeof image === 'string' ? `Product image ${idx + 1}` : image.caption}
+                    className="w-full h-32 object-cover rounded-md border"
+                    onError={(e) => {
+                      e.target.parentElement.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-md flex items-center justify-center">
+                    <span className="text-white text-xs text-center px-2">
+                      {typeof image === 'string' ? `Image ${idx + 1}` : image.caption}
+                    </span>
+                  </div>
                 </div>
+                {typeof image === 'object' && image.caption && (
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {image.caption}
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -919,21 +928,21 @@ export default function CampaignBuilder() {
           )}
 
           {/* Download Button */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 animate-bounce-in">
             <Button
               onClick={handleDownload}
-              className="flex-1"
+              className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               size="lg"
             >
-              <Download className="mr-2 h-4 w-4" />
-              Download All Assets (ZIP)
+              <Download className="mr-2 h-4 w-4 animate-bounce" />
+              🏖️ Download Your Vibes (ZIP)
             </Button>
             <Button
               onClick={handleReset}
-              variant="outline"
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               size="lg"
             >
-              New Campaign
+              🌊 Catch Another Wave
             </Button>
           </div>
         </div>
@@ -942,54 +951,64 @@ export default function CampaignBuilder() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-cyan-50 via-blue-50 to-purple-50 dark:from-slate-900 dark:to-slate-800 relative overflow-hidden">
+      {/* Beach-themed animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 text-6xl animate-float-slow">🌴</div>
+        <div className="absolute top-40 right-20 text-5xl animate-float-delayed">🌊</div>
+        <div className="absolute bottom-40 left-20 text-4xl animate-bounce-slow">🏄</div>
+        <div className="absolute top-60 right-40 text-5xl animate-spin-slow">☀️</div>
+        <div className="absolute bottom-20 right-10 text-4xl animate-float">🐚</div>
+        <div className="absolute top-80 left-40 text-3xl animate-float-delayed">🦀</div>
+        <div className="absolute bottom-60 right-60 text-4xl animate-bounce-slow">🍹</div>
+      </div>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-            AI Ad Campaign Builder
+        <div className="text-center mb-8 animate-fade-in">
+          <h1 className="text-5xl font-bold mb-3 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 bg-clip-text text-transparent animate-wave">
+            🌊 VibePost 🏖️
           </h1>
-          <p className="text-muted-foreground">
-            Create stunning ad campaigns with AI-powered images and videos
+          <p className="text-lg text-cyan-600 dark:text-cyan-400 font-medium animate-float">
+            Ride the wave of creativity • AI-powered beach vibes for your brand
           </p>
         </div>
 
         {/* Generate Random Data Button */}
         {currentStep === 1 && (
-          <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-6 animate-bounce-in">
             <Button
               onClick={handleGenerateRandomData}
               disabled={loading}
-              variant="outline"
+              className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
               size="lg"
             >
-              <Shuffle className="mr-2 h-4 w-4" />
-              Generate Random Data
+              <Shuffle className="mr-2 h-4 w-4 animate-spin-slow" />
+              🎲 Generate Random Vibes
             </Button>
           </div>
         )}
 
         {/* Progress Bar */}
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">
-              Step {currentStep} of {TOTAL_STEPS}
+            <span className="text-sm font-bold text-cyan-600 dark:text-cyan-400">
+              🌊 Wave {currentStep} of {TOTAL_STEPS}
             </span>
-            <span className="text-sm text-muted-foreground">
-              {currentStep === 1 && 'Company Information'}
-              {currentStep === 2 && 'Brand Guidelines'}
-              {currentStep === 3 && 'Social Media & Audience'}
-              {currentStep === 4 && 'Product Information'}
-              {currentStep === 5 && 'Campaign Concept'}
-              {currentStep === 6 && 'Results'}
+            <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+              {currentStep === 1 && '🏢 Company Vibes'}
+              {currentStep === 2 && '🎨 Brand Essence'}
+              {currentStep === 3 && '📱 Social Waves'}
+              {currentStep === 4 && '🎁 Product Story'}
+              {currentStep === 5 && '💡 Campaign Magic'}
+              {currentStep === 6 && '✨ Your Masterpiece'}
             </span>
           </div>
-          <Progress value={(currentStep / TOTAL_STEPS) * 100} max={100} />
+          <Progress value={(currentStep / TOTAL_STEPS) * 100} max={100} className="h-3 bg-cyan-100 dark:bg-cyan-900" />
         </div>
 
         {/* Main Content */}
-        <div className="max-w-3xl mx-auto">
-          <Card>
+        <div className="max-w-3xl mx-auto relative z-10">
+          <Card className="border-2 border-cyan-200 dark:border-cyan-800 shadow-2xl shadow-cyan-500/20 animate-slide-up">
             <CardHeader>
               <CardTitle>
                 {currentStep === 1 && 'Company Information'}
@@ -1036,8 +1055,9 @@ export default function CampaignBuilder() {
                     type="button"
                     onClick={handleNext}
                     disabled={loading}
+                    className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                   >
-                    Next
+                    Ride the Next Wave 🏄
                     <ChevronRight className="ml-2 h-4 w-4" />
                   </Button>
                 )}
@@ -1047,16 +1067,17 @@ export default function CampaignBuilder() {
                     type="button"
                     onClick={handleGenerateCampaign}
                     disabled={loading || !formData.campaignMessage}
+                    className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 animate-pulse-slow"
                   >
                     {loading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating...
+                        Creating Magic... ✨
                       </>
                     ) : (
                       <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Generate Campaign
+                        <Sparkles className="mr-2 h-4 w-4 animate-bounce" />
+                        🌊 Generate Campaign 🎨
                       </>
                     )}
                   </Button>

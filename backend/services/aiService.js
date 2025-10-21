@@ -281,10 +281,10 @@ class AIService {
   }
 
   /**
-   * Extract product images from website
+   * Extract product images from website with captions
    * @param {Object} $ - Cheerio instance
    * @param {string} url - Website URL
-   * @returns {Array} Array of image URLs
+   * @returns {Array} Array of image objects with url and caption
    */
   extractProductImages($, url) {
     const images = [];
@@ -292,8 +292,12 @@ class AIService {
 
     // Look for Open Graph images (commonly used for product images)
     const ogImage = $('meta[property="og:image"]').attr('content');
+    const ogImageAlt = $('meta[property="og:image:alt"]').attr('content');
     if (ogImage) {
-      images.push(this.normalizeImageUrl(ogImage, baseUrl));
+      images.push({
+        url: this.normalizeImageUrl(ogImage, baseUrl),
+        caption: ogImageAlt || 'Product featured image'
+      });
     }
 
     // Look for product images in common selectors
@@ -315,8 +319,13 @@ class AIService {
         const src = $(elem).attr('src') || $(elem).attr('data-src');
         if (src && !src.includes('logo') && !src.includes('icon')) {
           const normalizedUrl = this.normalizeImageUrl(src, baseUrl);
-          if (normalizedUrl && !images.includes(normalizedUrl)) {
-            images.push(normalizedUrl);
+          if (normalizedUrl && !images.find(img => img.url === normalizedUrl)) {
+            // Extract caption from alt text, title, or nearby text
+            const caption = this.extractImageCaption($, elem);
+            images.push({
+              url: normalizedUrl,
+              caption: caption
+            });
           }
         }
       });
@@ -324,6 +333,51 @@ class AIService {
 
     // Limit to first 5 images to avoid overwhelming the user
     return images.slice(0, 5);
+  }
+
+  /**
+   * Extract caption for an image from alt text, title, or nearby text
+   * @param {Object} $ - Cheerio instance
+   * @param {Object} elem - Image element
+   * @returns {string} Image caption
+   */
+  extractImageCaption($, elem) {
+    // Try alt text first
+    const alt = $(elem).attr('alt');
+    if (alt && alt.trim() && alt.length > 3) {
+      return alt.trim();
+    }
+
+    // Try title attribute
+    const title = $(elem).attr('title');
+    if (title && title.trim() && title.length > 3) {
+      return title.trim();
+    }
+
+    // Try aria-label
+    const ariaLabel = $(elem).attr('aria-label');
+    if (ariaLabel && ariaLabel.trim() && ariaLabel.length > 3) {
+      return ariaLabel.trim();
+    }
+
+    // Try to find caption in parent figure element
+    const figure = $(elem).closest('figure');
+    if (figure.length) {
+      const figcaption = figure.find('figcaption').text().trim();
+      if (figcaption && figcaption.length > 3) {
+        return figcaption.substring(0, 100);
+      }
+    }
+
+    // Try to find nearby text (sibling or parent text)
+    const parent = $(elem).parent();
+    const siblingText = parent.find('p, span, div').first().text().trim();
+    if (siblingText && siblingText.length > 3 && siblingText.length < 150) {
+      return siblingText.substring(0, 100);
+    }
+
+    // Default caption based on image position
+    return 'Product image';
   }
 
   /**
